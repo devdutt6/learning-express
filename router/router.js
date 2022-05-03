@@ -14,7 +14,7 @@ router.param('Technology', async ( req,res,next,Technology ) => {
     console.log("Entering param funtion with value %s", Technology);
     let user = await User.findOne({ Technology: Technology });
     if( !user ){
-        return res.status(400).json({ messgae: `No we are not learning ${Technology}` });
+        return res.status(400).json({ message: `No we are not learning ${Technology}` });
     }
     req.user = user;
     next();
