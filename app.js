@@ -1,38 +1,54 @@
 // importing required modules
 const express = require("express");
-const mongoose = require("mongoose");
-const { openApis } = require('./controllers/api');
-const authorized = require('./router/router');
 
 // intializign express app
 let app = express();
 
-// middleware to parse request data in json
+// middleware to parse request data in json which in built in express
 app.use(express.json());
+// options permitted in json middleware are
+/**
+ * 1. inflate
+ * 2. revival
+ * 3. strict
+ * 4. limit
+ * 5. strict
+ * 6. type
+ * 7. verify
+ */
 
-// just default api for page
-app.get('/', async ( req, res ) => {
-    return res.send('<h2>Hey Guys!</h2>');
-})
+// express.static() is a inbuilt express middleware only
+const options = {
+dotfiles: 'ignore', // allow, deny
+etag: false, // if true express generates the weak etags
+extensions: ['htm', 'html'],  // first come first serve
+// index: false,  // sends specified directories index.html file
+maxAge: '1d', // in miliseconds for Catch-Control
+redirect: false, // redirect to trailing "/" if uploaded pathname is directory
+setHeaders (res, path, stat) { // setting headers depeding on file being uploaded
+    res.set('x-timestamp', Date.now())
+}
+}
+// app.engine('html', require('ejs').renderFile);
+app.use(express.static('public', options));
 
-// middleware for logging api history
-app.use('/', async ( req,res,next ) => {
-    console.log(`${req.method} ${req.headers.host}${req.url} at ${Date.now().toString()}`, );
-    next();
-})
-
-// mounting the routes
-app.use('/open',openApis);
-app.use('/auth',authorized);
-
-
-// connectingto my local mongodb instance
-mongoose.connect( 'mongodb://localhost:27017/express',( err,data ) => {
-    if(err){
-        console.log("Error connecting DB");
+// express middleware for accepting other data types like form and urlencoded data
+const options2 = {
+    extended: true, // for other encoding types
+    inflate: true, // weather to accept zipped file or not
+    limit: "100kb", // size of data
+    parameterLimit: 20, // accpting max number of parameters
+    type: "appllication/x-www-form-urlencoded", // specific encoding
+    verify (req, res, buf, encoding) { // check before upload
+        // function body
     }
-    console.log('Database Connected');
-} )
+}
+app.use(express.urlencoded(options2));
+
+app.get("/", (req,res) => {
+    // res.render("index.html");
+    res.send("index");
+})
 
 // listening and serving on port 3000
 app.listen( 3000,(err,data) => {
